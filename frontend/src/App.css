@@ -1,0 +1,9 @@
+:root {
+  font-family: "popin";
+  background-color: #020617;
+  color: #e2e8f0;
+}
+
+#root {
+  min-height: 100vh;
+}
