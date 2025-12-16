@@ -6,7 +6,7 @@ export default function SellerDashboard() {
   return (
     <div className="flex min-h-screen  ">
       <SellerSidebar />
-      <main className=" bg-purple-900 flex-1   ">
+      <main className=" flex-1   ">
         <Outlet />
       </main>
     </div>
