@@ -21,7 +21,7 @@ export default function Register() {
     setLoading(true);
     try {
       await register(form);
-      navigate("/dashboard");
+      navigate("/login");
     } catch (error) {
       setErr(
         error?.response?.data?.message || error.message || "Registration failed"

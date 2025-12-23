@@ -1,56 +1,79 @@
-import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
-// import Dashboard from "../src/pages/Dashborad";
-import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
+import ProtectedRoute from "./components/ProtectedRoute";
+import RoleProtectedRoute from "./components/RoleProtectedRoute";
+
+// Seller
 import SellerDashboard from "./seller/SellerDashboard";
-import useAuth from "./hooks/useAuth";
-import SellerProtectedRoute from "./middleware/SellerProtectedRoute";
+import Dashboard from "./seller/pages/Dashboard";
 import UploadAssets from "./seller/pages/UploadAssets";
 import MyAssets from "./seller/pages/MyAssets";
-import Profile from "./seller/pages/Profile";
-import Dashboard from "./seller/pages/Dashboard";
 import Earning from "./seller/pages/Earning";
+import Profile from "./seller/pages/Profile";
+
+// Buyer
+import BuyerLayout from "./buyer/BuyerLayout";
+import Home from "./buyer/pages/Home";
+import AssetDetails from "./buyer/pages/AssetsDetails";
+import MyPurchases from "./buyer/pages/MyPurchases";
+import BuyerProfile from "./buyer/pages/Profile";
+
+// Other
+import Unauthorized from "./pages/Unauthorized";
 
 export default function App() {
-  const { user } = useAuth();
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <main className="">
-        <Routes>
-          {/* <Route path="/" element={<Dashboard />} /> */}
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
 
-          {/* Seller Dashboard (Nested Routes) */}
+      <Routes>
+        {/* Auth */}
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
 
-          <Route
-            path="/seller"
-            element={
-              <SellerProtectedRoute>
+        {/* SELLER ROUTES */}
+        <Route
+          path="/seller"
+          element={
+            <ProtectedRoute>
+              <RoleProtectedRoute allowedRoles={["creator"]}>
                 <SellerDashboard />
-              </SellerProtectedRoute>
-            }
-          >
-            <Route path="/seller/dashboard" element={<Dashboard />} />
-            <Route path="/seller/upload" element={<UploadAssets />} />
-            <Route path="/seller/my-assets" element={<MyAssets />} />
-            <Route path="/seller/earnings" element={<Earning />} />
-            <Route path="/seller/profile" element={<Profile />} />
-            {/* <Route
-              path="/seller"
-              element={<Navigate to="/seller/dashboard" replace />}
-            /> */}
-          </Route>
+              </RoleProtectedRoute>
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Dashboard />} />
+          <Route path="upload" element={<UploadAssets />} />
+          <Route path="my-assets" element={<MyAssets />} />
+          <Route path="earnings" element={<Earning />} />
+          <Route path="profile" element={<Profile />} />
+        </Route>
 
-          <Route path="*" element={<div>404 - Page not found</div>} />
-          {/* </Routes> */}
-        </Routes>
-      </main>
+        {/* BUYER ROUTES */}
+        <Route
+          path="/buyer"
+          element={
+            <ProtectedRoute>
+              <RoleProtectedRoute allowedRoles={["buyer"]}>
+                <BuyerLayout />
+              </RoleProtectedRoute>
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Home />} />
+          <Route path="asset/:id" element={<AssetDetails />} />
+          <Route path="purchases" element={<MyPurchases />} />
+          <Route path="profile" element={<BuyerProfile />} />
+        </Route>
+
+        {/* Unauthorized */}
+        <Route path="/unauthorized" element={<Unauthorized />} />
+
+        {/* 404 */}
+        <Route path="*" element={<div>404 - Page Not Found</div>} />
+      </Routes>
     </div>
   );
 }
