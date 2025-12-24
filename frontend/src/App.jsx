@@ -20,6 +20,12 @@ import AssetDetails from "./buyer/pages/AssetsDetails";
 import MyPurchases from "./buyer/pages/MyPurchases";
 import BuyerProfile from "./buyer/pages/Profile";
 
+// Admin
+import AdminLayout from "./admin/AdminLayout";
+import AdminDashboard from "./admin/pages/AdminDashboard";
+import UserManagement from "./admin/pages/UserManagement";
+import Reports from "./admin/pages/Reports";
+
 // Other
 import Unauthorized from "./pages/Unauthorized";
 
