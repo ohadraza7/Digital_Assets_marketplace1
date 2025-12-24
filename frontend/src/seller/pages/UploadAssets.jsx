@@ -1,6 +1,15 @@
 import { useState } from "react";
+import axios from "axios";
 
 export default function UploadAsset() {
+  // const [previewURL, setPreviewURL] = useState("");
+
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState("");
+
+  const [slug, setSlug] = useState("");
+
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -32,12 +41,9 @@ export default function UploadAsset() {
 
     const formData = new FormData();
 
-    formData.append("title", form.title);
-    formData.append("description", form.description);
-    formData.append("category", form.category);
-    formData.append("tags", form.tags);
+    Object.entries(form).forEach(([key, value]) => formData.append(key, value));
+
     formData.append("price", form.isFree ? 0 : form.price);
-    formData.append("license", form.license);
     formData.append("isFree", JSON.stringify(form.isFree));
 
     formData.append("assetFile", assetFile);
@@ -46,20 +52,27 @@ export default function UploadAsset() {
     const token = localStorage.getItem("token");
 
     try {
-      const res = await fetch("http://localhost:5000/api/assets/upload", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
+      setUploading(true);
+      setProgress(0);
 
-      const data = await res.json();
-      console.log("Upload success:", data);
+      const res = await axios.post(
+        "http://localhost:5000/api/assets/upload",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          onUploadProgress: (evt) => {
+            const percent = Math.round((evt.loaded * 100) / evt.total);
+            setProgress(percent);
+          },
+        }
+      );
 
+      console.log("Upload success:", res.data);
       alert("Asset submitted for review ✔");
 
-      // Optional: reset form
+      // reset form
       setForm({
         title: "",
         description: "",
@@ -69,16 +82,33 @@ export default function UploadAsset() {
         license: "standard",
         isFree: false,
       });
+
       setAssetFile(null);
       setPreviewImage(null);
     } catch (err) {
       console.error("Upload failed", err);
       alert("Upload failed ❌");
     }
+
+    setUploading(false);
   };
 
   return (
     <div className="mx-auto bg-white p-8 rounded-lg shadow">
+      {/* {previewURL && (
+        <img src={previewURL} className="h-32 rounded border mb-2" />
+      )} */}
+
+      {uploading && (
+        <div className="w-full bg-gray-200 rounded h-3">
+          <div
+            className="bg-blue-600 h-3 rounded"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
+
+      {/* {error && <p className="text-red-600">{error}</p>} */}
       <h1 className="text-3xl font-bold mb-6">Upload New Asset</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -208,9 +238,12 @@ export default function UploadAsset() {
         <div className="text-right">
           <button
             type="submit"
-            className="bg-blue-600 text-white px-6 py-2 rounded"
+            disabled={uploading}
+            className={`px-6 py-2 rounded text-white ${
+              uploading ? "bg-gray-400" : "bg-blue-600"
+            }`}
           >
-            Submit for Review
+            {uploading ? "Uploading..." : "Submit for Review"}
           </button>
         </div>
       </form>
