@@ -68,6 +68,22 @@ export default function App() {
           <Route path="profile" element={<BuyerProfile />} />
         </Route>
 
+        {/* ADMIN ROUTES */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <RoleProtectedRoute allowedRoles={["admin"]}>
+                <AdminLayout />
+              </RoleProtectedRoute>
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="users" element={<UserManagement />} />
+          <Route path="reports" element={<Reports />} />
+        </Route>
+
         {/* Unauthorized */}
         <Route path="/unauthorized" element={<Unauthorized />} />
 

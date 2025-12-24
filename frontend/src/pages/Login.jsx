@@ -27,6 +27,9 @@ export default function Login() {
       } else if (user.role === "buyer") {
         console.log("Navigating to buyer dashboard");
         navigate("/buyer");
+      } else if (user.role === "admin") {
+        navigate("/admin");
+        console.log("Navigating to Admin Dashboard");
       } else {
         console.log("Navigating to Home Page");
         navigate("/");
