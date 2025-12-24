@@ -14,7 +14,7 @@ export default function SellerSidebar({ children }) {
   const [isOpen, setIsOpen] = useState(true);
 
   const menus = [
-    { title: "Dashboard", icon: <FaBox />, path: "/seller/dashboard" },
+    { title: "Dashboard", icon: <FaBox />, path: "/seller" },
     { title: "Upload Asset", icon: <FaUpload />, path: "/seller/upload" },
     { title: "My Assets", icon: <FaImages />, path: "/seller/my-assets" },
     { title: "Earnings", icon: <FaMoneyBill />, path: "/seller/earnings" },

@@ -3,15 +3,13 @@ import useAuth from "../hooks/useAuth";
 import { Route, useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const { login } = useAuth();
+  const { user, login } = useAuth();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
-  // console.log(login() + " called");
-  // console.log(navigate() + " called");
   const submit = async (e) => {
     e.preventDefault();
     setErr("");
@@ -21,15 +19,14 @@ export default function Login() {
       await login(form.email, form.password);
 
       setLoading(false);
-      const role = localStorage.getItem("role");
-      console.log("Role after login:", role);
-      if (role === "creator") {
+
+      console.log("Role after login:", user.role);
+      if (user.role === "creator") {
         console.log("Navigating to Creator Dashboard");
-        navigate("/seller/dashboard");
-        // } else if (role === "buyer") {
-        //   navigate("/buyer/dashboard");
-        // } else if (role === "admin") {
-        //   navigate("/admin");
+        navigate("/seller");
+      } else if (user.role === "buyer") {
+        console.log("Navigating to buyer dashboard");
+        navigate("/buyer");
       } else {
         console.log("Navigating to Home Page");
         navigate("/");
