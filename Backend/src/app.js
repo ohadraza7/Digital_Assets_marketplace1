@@ -5,13 +5,10 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import assetRoutes from "./routes/assetRoutes.js";
 import { v2 as cloudinary } from "cloudinary"; //tempra
-import bcrypt from "bcryptjs";
+import adminRoutes from "./routes/adminRoutes.js";
 
 dotenv.config();
 connectDB();
-// const ADMIN_PASSWORD = "Admin@123";
-// const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
-// console.log(hashedPassword);
 
 // 4. TEMPORARY TEST: Check Cloudinary connection
 cloudinary.api
@@ -25,6 +22,7 @@ app.use(express.json());
 
 app.use("/api/assets", assetRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

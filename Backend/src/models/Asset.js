@@ -33,11 +33,51 @@ const assetSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["pending", "approved", "rejected"],
+      enum: ["pending", "approved", "rejected", "flagged", "removed"],
       default: "pending",
     },
 
-    rejectionReason: { type: String },
+    approvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    approvedAt: {
+      type: Date,
+    },
+
+    rejectedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    rejectedAt: {
+      type: Date,
+    },
+
+    rejectionReason: {
+      type: String,
+      default: "",
+    },
+
+    notificationSent: { type: Boolean, default: false },
+
+    moderationHistory: [
+      {
+        action: String,
+        admin: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        notes: String,
+        timestamp: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );

@@ -24,7 +24,10 @@ import BuyerProfile from "./buyer/pages/Profile";
 import AdminLayout from "./admin/AdminLayout";
 import AdminDashboard from "./admin/pages/AdminDashboard";
 import UserManagement from "./admin/pages/UserManagement";
+import AssetsModeration from "./admin/pages/AssetsModeration";
 import Reports from "./admin/pages/Reports";
+import PendingAssets from "./admin/components/PendingAssets";
+import ReviewAsset from "./admin/pages/ReviewAsset";
 
 // Other
 import Unauthorized from "./pages/Unauthorized";
@@ -86,8 +89,11 @@ export default function App() {
           }
         >
           <Route index element={<AdminDashboard />} />
+          <Route path="pending-assets" element={<PendingAssets />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="assets-moderation" element={<AssetsModeration />} />
+          <Route path="review/:id" element={<ReviewAsset />} />
         </Route>
 
         {/* Unauthorized */}
