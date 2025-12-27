@@ -2,11 +2,7 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    name: { type: String, required: true, trim: true },
 
     email: {
       type: String,
@@ -20,7 +16,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 6,
-      select: false, // never returned by default
+      select: false,
     },
 
     role: {
@@ -29,74 +25,52 @@ const userSchema = new mongoose.Schema(
       default: "buyer",
     },
 
+    // Account lifecycle state
     status: {
       type: String,
       enum: ["active", "suspended", "pending"],
       default: "active",
     },
 
-    // ---------- PROFILE DATA ----------
+    // PROFILE
     avatarUrl: String,
     bio: String,
     country: String,
 
-    // ---------- SELLER METADATA ----------
+    // CREATOR DATA
     creatorProfile: {
       portfolioUrl: String,
       specialization: String,
-      totalAssetsUploaded: {
-        type: Number,
-        default: 0,
-      },
-      totalEarnings: {
-        type: Number,
-        default: 0,
-      },
+      totalAssetsUploaded: { type: Number, default: 0 },
+      totalEarnings: { type: Number, default: 0 },
     },
 
-    // ---------- PLATFORM FLAGS ----------
-    emailVerified: {
-      type: Boolean,
-      default: false,
-    },
+    emailVerified: { type: Boolean, default: false },
 
-    isTwoFactorEnabled: {
-      type: Boolean,
-      default: false,
-    },
+    isTwoFactorEnabled: { type: Boolean, default: false },
 
     lastLoginAt: Date,
 
-    // ---------- SECURITY & ACCESS ----------
+    createdByAdmin: { type: Boolean, default: false },
 
-    isTwoFactorEnabled: {
-      type: Boolean,
-      default: false,
-    },
+    // Suspension
+    suspendedReason: { type: String, default: null },
+    suspendedAt: { type: Date, default: null },
+    isSuspended: { type: Boolean, default: false },
 
-    // ---------- AUDIT TRAIL ----------
-    createdByAdmin: {
-      type: Boolean,
-      default: false,
-    },
-    // Suspension system
-
-    isSuspended: {
-      type: Boolean,
-      default: false,
-    },
-
-    suspendedReason: {
-      type: String,
-      default: null,
-    },
-
-    suspendedAt: {
-      type: Date,
-      default: null,
-    },
+    // Notifications
+    notifications: [
+      {
+        message: String,
+        type: {
+          type: String,
+          enum: ["info", "warning", "ban", "system"],
+        },
+        read: { type: Boolean, default: false },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
   },
-
   { timestamps: true }
 );
 

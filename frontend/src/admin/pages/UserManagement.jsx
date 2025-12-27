@@ -1,52 +1,20 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
+import { getUsers, suspendUser, unsuspendUser } from "../services/adminUserApi";
+import { useNavigate } from "react-router-dom";
 
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
-
-  const token = localStorage.getItem("token");
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/admin/users", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      const res = await getUsers();
       setUsers(res.data);
     } catch (err) {
-      console.error("Failed to fetch users", err);
-    }
-  };
-
-  const updateStatus = async (id, status) => {
-    try {
-      await axios.put(
-        `http://localhost:5000/api/admin/users/${id}/status`,
-        { status },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      fetchUsers();
-    } catch (err) {
-      console.error("Failed to update status", err);
-    }
-  };
-
-  const changeRole = async (id, role) => {
-    try {
-      await axios.put(
-        `http://localhost:5000/api/admin/users/${id}/role`,
-        { role },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      fetchUsers();
-    } catch (err) {
-      console.error("Failed to change role", err);
+      console.log("Failed to load users", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,18 +22,44 @@ export default function UserManagement() {
     fetchUsers();
   }, []);
 
+  const handleSuspend = async (userId) => {
+    const reason = prompt("Enter suspension reason:");
+
+    if (!reason) return alert("Suspension reason is required");
+
+    try {
+      await suspendUser(userId, reason);
+      alert("User suspended & notified");
+      fetchUsers();
+    } catch {
+      alert("Failed to suspend user");
+    }
+  };
+
+  const handleUnsuspend = async (userId) => {
+    try {
+      await unsuspendUser(userId);
+      alert("User reinstated");
+      fetchUsers();
+    } catch {
+      alert("Failed to unsuspend user");
+    }
+  };
+
+  if (loading) return <p className="p-8">Loading users...</p>;
+
   return (
     <div className="p-8">
-      <h2 className="text-xl font-semibold mb-4">User Management</h2>
+      <h2 className="text-2xl font-semibold mb-4">User Management</h2>
 
       <table className="w-full border">
         <thead className="bg-gray-100">
           <tr>
-            <th className="p-3 text-left">Name</th>
+            <th className="p-3 text-left">User</th>
             <th className="p-3 text-left">Email</th>
             <th className="p-3 text-left">Role</th>
             <th className="p-3 text-left">Status</th>
-            <th className="p-3 text-left">Actions</th>
+            <th className="p-3 text-left">Action</th>
           </tr>
         </thead>
 
@@ -75,44 +69,47 @@ export default function UserManagement() {
               <td className="p-3">{u.name}</td>
               <td className="p-3">{u.email}</td>
               <td className="p-3 capitalize">{u.role}</td>
+
               <td className="p-3">
-                {u.status === "suspended" ? (
-                  <span className="text-red-500 font-semibold">Suspended</span>
+                <span>{u.status}</span>
+                {/* {!u.isSuspended ? (
+                  <span className="text-red-600 font-semibold">Suspended</span>
                 ) : (
                   <span className="text-green-600 font-semibold">Active</span>
-                )}
+                )} */}
               </td>
-
               <td className="p-3 flex gap-2">
-                {u.status === "suspended" ? (
+                <button
+                  onClick={() => {
+                    navigate(`/admin/user/${u._id}`);
+                  }}
+                  className="px-3 py-1 rounded bg-blue-600 text-white"
+                >
+                  View
+                </button>
+
+                {!u.isSuspended ? (
                   <button
-                    className="px-3 py-1 rounded bg-green-600 text-white"
-                    onClick={() => updateStatus(u._id, "active")}
-                  >
-                    Restore
-                  </button>
-                ) : (
-                  <button
+                    onClick={() => handleSuspend(u._id)}
                     className="px-3 py-1 rounded bg-red-600 text-white"
-                    onClick={() => updateStatus(u._id, "suspended")}
                   >
                     Suspend
                   </button>
+                ) : (
+                  <button
+                    onClick={() => handleUnsuspend(u._id)}
+                    className="px-3 py-1 rounded bg-green-600 text-white"
+                  >
+                    Restore
+                  </button>
                 )}
-
-                <select
-                  className="border p-1 rounded"
-                  value={u.role}
-                  onChange={(e) => changeRole(u._id, e.target.value)}
-                >
-                  <option value="buyer">Buyer</option>
-                  <option value="creator">Creator</option>
-                </select>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {/* <UserProfileModeration /> */}
     </div>
   );
 }

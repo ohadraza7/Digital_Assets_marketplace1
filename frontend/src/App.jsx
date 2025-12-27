@@ -28,6 +28,7 @@ import AssetsModeration from "./admin/pages/AssetsModeration";
 import Reports from "./admin/pages/Reports";
 import PendingAssets from "./admin/components/PendingAssets";
 import ReviewAsset from "./admin/pages/ReviewAsset";
+import UserProfileModeration from "./admin/pages/UserProfileModeration";
 
 // Other
 import Unauthorized from "./pages/Unauthorized";
@@ -94,6 +95,7 @@ export default function App() {
           <Route path="reports" element={<Reports />} />
           <Route path="assets-moderation" element={<AssetsModeration />} />
           <Route path="review/:id" element={<ReviewAsset />} />
+          <Route path="user/:id" element={<UserProfileModeration />} />
         </Route>
 
         {/* Unauthorized */}

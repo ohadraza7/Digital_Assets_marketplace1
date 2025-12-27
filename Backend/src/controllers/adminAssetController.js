@@ -1,6 +1,8 @@
 import Asset from "../models/Asset.js";
 import AdminLog from "../models/Asset.js";
 import User from "../models/User.js";
+import { sendEmail } from "../utils/emailService.js";
+
 // import Order from "../models/Order.js";
 
 // Get Dashboard Stats
@@ -226,7 +228,7 @@ export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find({
       role: { $in: ["buyer", "creator"] },
-    }).select("-password");
+    });
     res.json(users);
   } catch (err) {
     console.error("Error fetching users", err);
@@ -234,20 +236,110 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-// Update User Status (Suspend / Restore)
-export const updateUserStatus = async (req, res) => {
+// Get User By ID
+
+export const getUserById = async (req, res) => {
   try {
-    const { status } = req.body;
+    const { id } = req.params;
+    // console.log("REQ PARAMS:", req.params._id);
+    // console.log("REQ QUERY:", req.query);
 
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true }
-    ).select("-password");
+    // fetch user + include password only if needed
+    const user = await User.findById(id).select("-password -__v");
+    // console.log("Fetched User:", user);
 
-    res.json(user);
-  } catch (err) {
-    console.error("Error updating user status", err);
-    res.status(500).json({ message: "Server error" });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    console.error("Get User Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+export const suspendUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { reason } = req.body;
+
+    const user = await User.findById(userId);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+    // console.log("for the check user suspended" + user);
+
+    user.isSuspended = true;
+    user.suspendedAt = new Date();
+
+    user.status = "suspended";
+    user.suspendedReason = reason || "Policy violation";
+
+    user.notifications.push({
+      message: `Your account has been suspended. Reason: ${reason}`,
+      type: "ban",
+    });
+
+    await user.save();
+
+    await sendEmail(
+      user.email,
+      "Account Suspension Notice",
+      `
+      <h2>Your Account Has Been Suspended</h2>
+      <p><strong>Reason:</strong> ${reason}</p>
+      <p>If you think this is a mistake, contact support.</p>
+      `
+    );
+
+    return res.json({ message: "User suspended & notified", user });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Suspension failed" });
+  }
+};
+
+export const unsuspendUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await User.findById(userId);
+    console.log("for the check user unsuspend" + user.isSuspended);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.isSuspended = false;
+    user.suspendedReason = "";
+    user.status = "active";
+    console.log(user.status);
+    user.suspendedAt = new Date();
+    user.notifications.push({
+      message: "Your account has been reinstated",
+      type: "system",
+    });
+
+    await user.save();
+
+    await sendEmail(
+      user.email,
+      "Account Reinstated",
+      `
+      <h2>Your Account Has Been Reactivated</h2>
+      <p>You may continue using your account.</p>
+      `
+    );
+
+    return res.json({ message: "User unsuspended & notified", user });
+  } catch (error) {
+    res.status(500).json({ message: "Unsuspend failed" });
   }
 };
